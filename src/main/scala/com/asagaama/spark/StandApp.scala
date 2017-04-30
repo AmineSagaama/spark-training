@@ -10,33 +10,16 @@ import org.apache.spark.SparkConf
   */
 object StandApp {
 
-  def flatmapExemple(sc: SparkContext) = {
-    val liste: List[String] = List(
-      "hello World",
-      "Coucou",
-      "tttt"
-    )
-    val listCount = liste.map(x => x.size)
-    listCount.foreach(x => println(x))
-
-    val ligne = "coucou coucou"
-    val listeMots: Array[String] = ligne.split(' ')
-    val listDeListeDeMots = liste.map(x => x.split(' '))
-    val listeDeMots = listDeListeDeMots.flatMap(x => x)
-    listeDeMots.foreach(x => println(x))
-
-
-    def pair(x: String): Option[String] = if (x.size % 2 == 0) Some(x) else None
-
-    val listeDeMotsDeLongeurPaire = listeDeMots.flatMap(x => if (x.size % 2 == 0) Some(x) else None)
-    listeDeMotsDeLongeurPaire.foreach(println)
-
-  }
 
   def main(args: Array[String]) = {
     val conf = new SparkConf().setAppName("My App").setMaster("local[*]")
     val sc = new SparkContext(conf)
-    flatmapExemple(sc)
+    val inputFile = "/Users/ebiz/Documents/spark/spark-2.1.0-bin-hadoop2.7/README.md"
+    val outputFile = "/Users/ebiz/Documents/spark/test.txt"
+    val input = sc.textFile(inputFile)
+    val words = input.flatMap(line => line.split(" "))
+    val counts = words.map(word => (word, 1)).reduceByKey { case (x, y) => x + y }
+    counts.saveAsTextFile(outputFile)
   }
 
 
